@@ -38,6 +38,7 @@ This skill requires two MCP servers to be connected:
 1. Call `list_catalogs()` and ask the user which catalog to publish from.
 2. Call `list_items({ catalog_id })` to get all items.
 3. Call `get_catalog({ id })` to get catalog details — note `contact_phone` if present.
+4. Ask the user: **"All items, or do you want to pick specific ones?"** — just two options. Do NOT list the items upfront. If they pick specific ones, then show the list and let them choose.
 
 ## Step 2 — Download Images
 
@@ -53,12 +54,13 @@ curl -o "gs-images/{item_id}/{filename}" "{image_url}"
 
 ## Step 3 — Gather User Info
 
-Ask the user once and reuse for all listings:
+Reuse saved details when possible. Only ask the user for info you don't already have.
 
-1. **Location** — district/city for OLX, city or ZIP for Facebook. Example: "Lisboa", "Porto".
-2. **Phone number** — check if the catalog has `contact_phone`. If yes, use it. If not, ask the user. Only needed for OLX. Must be in **Portuguese format** (e.g. `911 115 566`).
-3. **Platforms** — ask which platforms to publish to: OLX, Facebook Marketplace, or both.
-4. **Item selection** — ask whether to publish all items or let them pick specific ones.
+1. **Platforms** — ask which platforms to publish to: OLX, Facebook Marketplace, or both.
+2. **Location** — check if the user's location is known from previous sessions (memory). If not, ask. Example: "Lisboa", "Porto".
+3. **Phone number** — check the catalog's `contact_phone` first. If empty, check if the user's phone is known from previous sessions (memory). If neither, ask. Must be in **Portuguese format** (e.g. `911 115 566`). Only needed for OLX.
+
+Save any newly provided location or phone number to memory so you don't have to ask again next time.
 
 ## Step 4 — Infer Category
 
@@ -120,12 +122,10 @@ After filling fields, move on. Do not screenshot after every single field — be
 
 ### Review and publish
 
-1. `browser_scroll` down to see the full form.
-2. `browser_take_screenshot` to show the user the complete listing.
-3. Ask the user: "Here's the listing preview for '{item.title}'. Should I publish it?"
-4. If confirmed, click the "Publicar anúncio" button.
-5. **Promotion upsell page** — OLX will show a "Destacar anúncio" page with paid promotion options. Click **"Não destacar"** to skip, then confirm with **"Sim, publicar"** in the dialog that appears.
-6. `browser_take_screenshot` to capture the confirmation page ("O anúncio foi ativado"). Note the ad ID from the URL for the summary.
+1. `browser_take_screenshot` to verify the form looks correct.
+2. Click the "Publicar anúncio" button. **Do NOT ask the user for confirmation on each item** — just publish and move on to the next. Only stop if something goes wrong.
+3. **Promotion upsell page** — OLX will show a "Destacar anúncio" page with paid promotion options. Click **"Não destacar"** to skip, then confirm with **"Sim, publicar"** in the dialog that appears.
+4. Note the ad ID from the URL for the summary, then immediately start the next item.
 
 ---
 
@@ -175,10 +175,8 @@ Facebook typically shows the photo upload area at the top of the form.
 
 ### Review and publish
 
-1. `browser_take_screenshot` to show the complete listing.
-2. Ask the user for confirmation.
-3. Click "Publish" or "Next" — Facebook sometimes has multi-step publishing. Follow each step, using `browser_take_screenshot` to track progress.
-4. `browser_take_screenshot` on the result page. Note that Facebook Marketplace listings may not have a stable shareable URL.
+1. Click "Publish" or "Next" — **do NOT ask for confirmation on each item**, just publish and move on. Facebook sometimes has multi-step publishing. Follow each step.
+2. Note the result, then immediately start the next item.
 
 ---
 
