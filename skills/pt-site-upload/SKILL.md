@@ -30,6 +30,7 @@ This skill requires two MCP servers to be connected:
 - `browser_evaluate` — run JavaScript in the page
 - `browser_press_key` — press a keyboard key
 - `browser_close` — close the browser
+- `browser_launch` — ensure Chrome is running. Use this if you get ECONNREFUSED errors (Chrome was closed).
 
 ---
 
@@ -138,7 +139,7 @@ Repeat for each item to publish on Facebook Marketplace.
 1. `browser_navigate` to `https://www.facebook.com/marketplace/create/item`
 2. `browser_snapshot` to check the current state.
 3. **If a cookie consent dialog appears**, accept all cookies.
-4. **If you see a login page:** Tell the user "Please log in to Facebook in the browser window. I'll wait." Poll with `browser_take_screenshot` until the listing form appears.
+4. **If you see a login page:** Tell the user "Please log in to Facebook in the browser window. I'll wait." Poll with `browser_snapshot` every 10 seconds, checking for "Item for sale" heading to confirm the listing form loaded. Note: `browser_wait_for` has a 5s timeout which is too short for manual login — use polling instead.
 
 ### Fill the form (Step 1 of 2)
 
