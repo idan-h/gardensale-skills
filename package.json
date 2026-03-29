@@ -20,8 +20,7 @@
     "skills",
     "gardensale",
     "marketplace",
-    "olx",
-    "custojusto"
+    "olx"
   ],
   "publishConfig": {
     "access": "public"
@@ -29,6 +28,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/idanhe/gardensale-skills"
+    "url": "https://github.com/idan-h/gardensale-skills"
   }
 }
