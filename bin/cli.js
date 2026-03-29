@@ -17,6 +17,7 @@ const AGENT_PATHS = {
 
 const MCP_CONFIG_PATHS = {
   'claude-code': {
+    local: '.mcp.json',
     global: path.join(os.homedir(), '.claude.json'),
     key: 'mcpServers',
   },
@@ -33,6 +34,11 @@ const MCP_CONFIG_PATHS = {
     local: '.vscode/mcp.json',
     key: 'servers',
   },
+}
+
+const GARDENSALE_URLS = {
+  prod: 'https://mcp.gardensale.eu',
+  dev: 'http://localhost:3001',
 }
 
 const SKILLS_DIR = path.join(__dirname, '..', 'skills')
@@ -87,7 +93,7 @@ function toForwardSlashes(p) {
   return p.replace(/\\/g, '/')
 }
 
-function configureMcp(skillDir, targetDir, agent) {
+function configureMcp(skillDir, targetDir, agent, isDev, isGlobal) {
   const mcpJsonPath = path.join(skillDir, 'mcp.json')
   if (!fs.existsSync(mcpJsonPath)) return
 
@@ -104,15 +110,18 @@ function configureMcp(skillDir, targetDir, agent) {
   // Read and resolve placeholders in the skill's mcp.json
   let mcpRaw = fs.readFileSync(mcpJsonPath, 'utf-8')
   mcpRaw = mcpRaw.replace(/\{RESOURCES_DIR\}/g, resourcesDir)
+  mcpRaw = mcpRaw.replace(/\{GARDENSALE_URL\}/g, isDev ? GARDENSALE_URLS.dev : GARDENSALE_URLS.prod)
   const skillMcp = JSON.parse(mcpRaw)
 
-  // Determine which config file to use: prefer local (project-level), fall back to global
+  // Determine which config file to use: -g writes to global, otherwise local (project-level)
   let configPath = null
-  if (mcpConfig.local) {
-    configPath = path.resolve(process.cwd(), mcpConfig.local)
-  }
-  if (!configPath && mcpConfig.global) {
+  if (isGlobal && mcpConfig.global) {
     configPath = mcpConfig.global
+  } else if (!isGlobal && mcpConfig.local) {
+    configPath = path.resolve(process.cwd(), mcpConfig.local)
+  } else {
+    // Fallback: use whichever is available
+    configPath = mcpConfig.global || (mcpConfig.local && path.resolve(process.cwd(), mcpConfig.local))
   }
   if (!configPath) return
 
@@ -156,7 +165,7 @@ function configureMcp(skillDir, targetDir, agent) {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n')
 }
 
-function addSkill(skillName, agent) {
+function addSkill(skillName, agent, isDev, isGlobal) {
   if (!skillName) {
     console.error('Error: skill name required.\nUsage: gardensale-skills add <skill-name> -a <platform>')
     process.exit(1)
@@ -183,7 +192,8 @@ function addSkill(skillName, agent) {
     process.exit(1)
   }
 
-  const targetDir = path.join(process.cwd(), agentPath, skillName)
+  const baseDir = isGlobal ? os.homedir() : process.cwd()
+  const targetDir = path.join(baseDir, agentPath, skillName)
   fs.mkdirSync(targetDir, { recursive: true })
 
   // Copy SKILL.md
@@ -199,7 +209,7 @@ function addSkill(skillName, agent) {
   console.log(`  Location: ${path.relative(process.cwd(), path.join(targetDir, 'SKILL.md'))}`)
 
   // Auto-configure MCP servers
-  configureMcp(skillDir, targetDir, agent)
+  configureMcp(skillDir, targetDir, agent, isDev, isGlobal)
 
   console.log()
 }
@@ -214,18 +224,25 @@ if (command === 'list') {
   const skillName = args[1]
   const agentFlagIdx = args.indexOf('-a')
   const agent = agentFlagIdx !== -1 ? args[agentFlagIdx + 1] : null
-  addSkill(skillName, agent)
+  const isDev = args.includes('--dev')
+  const isGlobal = args.includes('-g') || args.includes('--global')
+  addSkill(skillName, agent, isDev, isGlobal)
 } else {
   console.log(`
 gardensale-skills — AI agent skills for GardenSale
 
 Commands:
-  add <skill> -a <platform>   Install a skill for a platform
-  list                        List available skills
+  add <skill> -a <platform> [-g] [--dev]   Install a skill for a platform
+  list                                    List available skills
+
+Options:
+  -g, --global   Install to home directory (global, available in all projects)
+  --dev          Use local dev MCP URLs (default: production)
 
 Platforms: ${Object.keys(AGENT_PATHS).join(', ')}
 
 Example:
-  npx gardensale-skills add pt-site-upload -a claude-code
+  npx gardensale-skills add pt-site-upload -a claude-code -g
+  npx gardensale-skills add pt-site-upload -a claude-code -g --dev
 `)
 }

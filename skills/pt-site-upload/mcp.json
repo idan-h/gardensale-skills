@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "gardensale": {
+      "type": "url",
+      "url": "{GARDENSALE_URL}"
+    },
     "playwright": {
       "command": "npx",
       "args": [

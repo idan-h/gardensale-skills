@@ -5,5 +5,5 @@
   "platforms": ["OLX", "Facebook Marketplace"],
   "language": "en",
   "version": "2.0.0",
-  "mcpDependencies": ["@playwright/mcp"]
+  "mcpDependencies": ["gardensale-mcp", "@playwright/mcp"]
 }
