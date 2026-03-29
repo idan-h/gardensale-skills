@@ -136,47 +136,36 @@ Repeat for each item to publish on Facebook Marketplace.
 ### Navigate and check login
 
 1. `browser_navigate` to `https://www.facebook.com/marketplace/create/item`
-2. `browser_take_screenshot` to see the current state.
-3. **If you see a login page:** Tell the user "Please log in to Facebook in the browser window. I'll wait." Poll with `browser_take_screenshot` until the listing form appears.
+2. `browser_snapshot` to check the current state.
+3. **If a cookie consent dialog appears**, accept all cookies.
+4. **If you see a login page:** Tell the user "Please log in to Facebook in the browser window. I'll wait." Poll with `browser_take_screenshot` until the listing form appears.
+
+### Fill the form (Step 1 of 2)
+
+Fill fields in order using `browser_snapshot`:
+
+1. **Title** — `browser_type` into the "Title" textbox.
+2. **Price** — `browser_type` into the "Price" textbox.
+3. **Category** — click the "Category" combobox. A dropdown dialog appears with grouped categories (Home & Garden, Electronics, Clothing & Accessories, etc.). Click the best match.
+4. **Condition** — click the "Condition" combobox. Select from: New, Used - Like New, Used - Good, Used - Fair. Default to "Used - Good".
+5. **Description** — after selecting a category, a "More details" section expands. Find the "Description" textbox and type `{item.description}`.
+6. **Location** — also in "More details". May be pre-filled from the account. If it needs changing, clear and type the user's city.
+
+No phone number needed for Facebook Marketplace.
 
 ### Upload images
 
-Facebook typically shows the photo upload area at the top of the form.
+1. `browser_click` the "Add photos or drag and drop" button — this opens a file chooser dialog.
+2. `browser_file_upload` with the local file paths from Step 2. Facebook allows max 10 images.
+3. `browser_snapshot` to verify photos count updated (e.g. "2 / 10").
 
-1. `browser_snapshot` to find the upload input.
-2. `browser_file_upload` with local file paths. Facebook allows max 10 images.
-3. `browser_take_screenshot` to verify uploads.
+### Publish (Step 2 of 2)
 
-### Fill the form
-
-1. `browser_snapshot` to find form fields.
-2. Fill each field:
-
-| Field | Value | Tool |
-|-------|-------|------|
-| Title | `{item.title}` | `browser_type` |
-| Price | `{item.price}` | `browser_type` |
-| Description | `{item.description}` | `browser_type` |
-| Condition | "Used — Good" (unless description says otherwise) | `browser_click` or `browser_select_option` |
-
-3. No phone number needed for Facebook Marketplace.
-
-### Select category
-
-1. Find the category field via `browser_snapshot`.
-2. Click it and `browser_take_screenshot` to see options.
-3. Select the inferred category. Navigate dropdowns or search fields as needed.
-
-### Fill location
-
-1. Find the location field via `browser_snapshot`.
-2. `browser_type` the user's city.
-3. Wait for and select the autocomplete suggestion.
-
-### Review and publish
-
-1. Click "Publish" or "Next" — **do NOT ask for confirmation on each item**, just publish and move on. Facebook sometimes has multi-step publishing. Follow each step.
-2. Note the result, then immediately start the next item.
+1. Click **"Next"** (disabled until required fields are filled).
+2. Step 2 shows "List in more places" — Marketplace is pre-selected. Click **"Publish"**.
+3. Facebook redirects to "Your listings" page.
+4. **"Boost your listing" dialog** may appear — click **"Close"** to skip.
+5. **Do NOT ask the user for confirmation on each item** — just publish and move on to the next item.
 
 ---
 
