@@ -40,6 +40,8 @@ Use item title, description, and images to infer the best category:
 
 ## Navigation Tips
 
+- **IMPORTANT: Never navigate directly to `/adding/`.** OLX has bot detection (DataDome) that blocks direct access to the posting page. Always navigate to `https://www.olx.pt/` first, wait for it to load, then navigate to `/adding/`.
+- **Cookie consent:** OLX shows a cookie banner on first visit. Accept all cookies ("Aceitar" / "Aceitar todos") before doing anything else — some page functionality may not work until cookies are accepted.
 - The category picker is a multi-level clickable tree. Use `browser_snapshot` to read options at each level.
 - After clicking a top-level category, subcategories appear. Snapshot again to see them.
 - Location field has autocomplete — type the city, wait for suggestions, click the right one.

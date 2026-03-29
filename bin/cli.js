@@ -107,10 +107,20 @@ function configureMcp(skillDir, targetDir, agent, isDev, isGlobal) {
   // Resolve the resources directory path (forward slashes for cross-platform compat)
   const resourcesDir = toForwardSlashes(path.resolve(path.join(targetDir, 'resources')))
 
+  // Resolve default Chrome user data directory per platform
+  const chromeUserDataDir = toForwardSlashes(
+    process.platform === 'win32'
+      ? path.join(process.env['LOCALAPPDATA'] || '', 'Google', 'Chrome', 'User Data')
+      : process.platform === 'darwin'
+        ? path.join(os.homedir(), 'Library', 'Application Support', 'Google', 'Chrome')
+        : path.join(os.homedir(), '.config', 'google-chrome')
+  )
+
   // Read and resolve placeholders in the skill's mcp.json
   let mcpRaw = fs.readFileSync(mcpJsonPath, 'utf-8')
   mcpRaw = mcpRaw.replace(/\{RESOURCES_DIR\}/g, resourcesDir)
   mcpRaw = mcpRaw.replace(/\{GARDENSALE_URL\}/g, isDev ? GARDENSALE_URLS.dev : GARDENSALE_URLS.prod)
+  mcpRaw = mcpRaw.replace(/\{CHROME_USER_DATA_DIR\}/g, chromeUserDataDir)
   const skillMcp = JSON.parse(mcpRaw)
 
   // Determine which config file to use: -g writes to global, otherwise local (project-level)

@@ -15,6 +15,7 @@ This skill requires two MCP servers to be connected:
 - `list_items({ catalog_id })` — get items in a catalog
 - `get_item({ id })` — get a single item
 - `get_catalog({ id })` — get catalog details (includes `contact_phone`)
+- `download_item_images({ item_id, filenames })` — get image URLs for an item. Pass ALL filenames from the item's `images` array in a single call.
 
 **Playwright MCP** (`@playwright/mcp`) — provides browser control:
 - `browser_navigate` — open a URL
@@ -37,32 +38,25 @@ This skill requires two MCP servers to be connected:
 1. Call `list_catalogs()` and ask the user which catalog to publish from.
 2. Call `list_items({ catalog_id })` to get all items.
 3. Call `get_catalog({ id })` to get catalog details — note `contact_phone` if present.
-4. For each item, build image URLs using this pattern:
-   ```
-   {POCKETBASE_URL}/api/files/items/{item.id}/{filename}
-   ```
-   Where `POCKETBASE_URL` is the PocketBase server URL. If you do not know it, ask the user. Common values: `http://127.0.0.1:8090` (local) or the production URL.
 
 ## Step 2 — Download Images
 
 `browser_file_upload` requires local file paths. Download all images before navigating to any marketplace.
 
-For each item, download its images to a temp directory:
+1. For each item, call `download_item_images({ item_id, filenames })` to get the image URLs.
+2. Download each image to a local directory using `curl`:
 ```bash
-mkdir -p /tmp/gs-images/{item_id}
-curl -o "/tmp/gs-images/{item_id}/{filename}" "{image_url}"
+mkdir -p gs-images/{item_id}
+curl -o "gs-images/{item_id}/{filename}" "{image_url}"
 ```
-
-On Windows, use `%TEMP%\gs-images\` instead of `/tmp/gs-images/`.
-
-Verify downloads succeeded before proceeding.
+3. Verify downloads succeeded (non-zero file sizes) before proceeding.
 
 ## Step 3 — Gather User Info
 
 Ask the user once and reuse for all listings:
 
 1. **Location** — district/city for OLX, city or ZIP for Facebook. Example: "Lisboa", "Porto".
-2. **Phone number** — check if the catalog has `contact_phone`. If yes, use it. If not, ask the user. Only needed for OLX.
+2. **Phone number** — check if the catalog has `contact_phone`. If yes, use it. If not, ask the user. Only needed for OLX. Must be in **Portuguese format** (e.g. `911 115 566`).
 3. **Platforms** — ask which platforms to publish to: OLX, Facebook Marketplace, or both.
 4. **Item selection** — ask whether to publish all items or let them pick specific ones.
 
@@ -92,56 +86,46 @@ Repeat for each item to publish on OLX.
 
 ### Navigate and check login
 
-1. `browser_navigate` to `https://www.olx.pt/adding/`
-2. `browser_take_screenshot` to see the current state.
-3. **If you see a login/signup page:** Tell the user "Please log in to OLX in the browser window. I'll wait." Then poll with `browser_take_screenshot` every 10 seconds until the posting form appears.
-4. **If you see the posting form:** Continue.
-
-### Select category
-
-1. `browser_snapshot` to find the category picker element.
-2. Click the category picker.
-3. `browser_take_screenshot` to see the category options.
-4. Navigate the category tree by clicking the top-level category, then the subcategory. Use `browser_snapshot` after each click to read the available options.
-5. `browser_take_screenshot` to verify the correct category is selected.
+1. `browser_navigate` to `https://www.olx.pt/` (the homepage — **never** go directly to `/adding/` first, as it triggers bot detection).
+2. `browser_snapshot` to check for a cookie consent banner/dialog.
+3. **If a cookie banner appears**, accept all cookies by clicking the "Aceitar" or "Aceitar todos" button.
+4. `browser_take_screenshot` to see the current state.
+5. **If you see a login/signup page:** Tell the user "Please log in to OLX in the browser window. I'll wait." Then poll with `browser_take_screenshot` every 10 seconds until the homepage loads normally.
+6. **Once the homepage is loaded**, `browser_navigate` to `https://www.olx.pt/adding/` to open the posting form.
+7. `browser_take_screenshot` to verify the posting form appeared.
+8. **If you see a login page on `/adding/`:** Tell the user "Please log in to OLX in the browser window. I'll wait." Poll until the form appears.
 
 ### Fill the form
 
-1. `browser_snapshot` to find all form fields.
-2. For each field, use the accessibility tree to identify the correct input element, then fill it:
+The form has these sections. Fill them in order using `browser_snapshot` to find elements:
 
-| Field | Value | Tool |
-|-------|-------|------|
-| Título | `{item.title}` — truncate to 70 chars if needed | `browser_type` |
-| Descrição | `{item.description}` | `browser_type` |
-| Preço | `{item.price}` | `browser_type` |
-| Telefone | catalog `contact_phone` or user-provided | `browser_type` |
+1. **Título** — type `{item.title}` (max 70 chars). After typing, OLX will **auto-suggest a category** below the title field. `browser_snapshot` to see the suggestion.
+2. **Category** — OLX auto-suggests categories based on the title. If the suggestion is reasonable, click it to accept. If not, click "Alterar" to open the category picker and navigate manually.
+3. **Estado** — click "Usado" (or "Novo" if appropriate).
+4. **Preço** — type `{item.price}`.
+5. **Descrição** — type `{item.description}`.
+6. **Particular ou Profissional** — click **"Particular"**. This field is required and the form will not submit without it.
+7. **Localização** — the location field may be pre-filled from the account. If it needs changing, clear it and type the user's city, then select from autocomplete.
+8. **Telefone** — type the phone number in **Portuguese format** (e.g. `911 115 566`). OLX validates the format and will reject raw digits.
 
-3. After filling each field, move on. Do not screenshot after every single field — be efficient.
+After filling fields, move on. Do not screenshot after every single field — be efficient.
 
 ### Upload images
 
-1. `browser_snapshot` to find the file upload input or photo upload area.
-2. `browser_file_upload` with the local file paths from Step 2. OLX allows max 8 images.
-3. `browser_take_screenshot` to verify image thumbnails appeared.
-4. Wait a moment for uploads to process if needed.
-
-### Fill location
-
-1. Find the location/address field via `browser_snapshot`.
-2. `browser_type` the user's city name.
-3. `browser_take_screenshot` to see the autocomplete suggestions.
-4. `browser_click` the correct suggestion. If no autocomplete appears, try pressing Enter or waiting.
-5. `browser_take_screenshot` to verify location is set.
+1. `browser_snapshot` to find the "Choose File" button in the images section.
+2. `browser_click` the "Choose File" button — this opens a file chooser dialog.
+3. `browser_file_upload` with the local file paths from Step 2. OLX allows max 8 images.
+4. `browser_snapshot` to verify image thumbnails appeared (look for an img element with the filename).
+5. OLX may use AI to auto-fill some fields based on the uploaded image — verify these are correct.
 
 ### Review and publish
 
 1. `browser_scroll` down to see the full form.
 2. `browser_take_screenshot` to show the user the complete listing.
 3. Ask the user: "Here's the listing preview for '{item.title}'. Should I publish it?"
-4. If confirmed, find and click the publish/submit button.
-5. `browser_take_screenshot` to capture the confirmation page.
-6. Extract the listing URL if visible. Save it for the summary.
+4. If confirmed, click the "Publicar anúncio" button.
+5. **Promotion upsell page** — OLX will show a "Destacar anúncio" page with paid promotion options. Click **"Não destacar"** to skip, then confirm with **"Sim, publicar"** in the dialog that appears.
+6. `browser_take_screenshot` to capture the confirmation page ("O anúncio foi ativado"). Note the ad ID from the URL for the summary.
 
 ---
 
@@ -232,4 +216,4 @@ Totals:
 - **Be adaptive.** Page layouts change. Never assume a fixed DOM structure. Read the page, then act.
 - **Be efficient.** Don't screenshot after every tiny action. Screenshot at key checkpoints: after login, after category selection, after image upload, before publish.
 - **Process items sequentially.** Finish one item completely before starting the next.
-- **Between items**, navigate directly to the posting URL again rather than looking for a "post another" link.
+- **Between items**, navigate to `https://www.olx.pt/` first, then to `https://www.olx.pt/adding/`. Never go directly to `/adding/` — it triggers bot detection.
