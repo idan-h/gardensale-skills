@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "gardensale": {
-      "type": "url",
+      "type": "http",
       "url": "{GARDENSALE_URL}"
     },
     "playwright": {
