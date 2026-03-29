@@ -90,6 +90,7 @@ const TOOLS = [
   { name: 'browser_take_screenshot', description: 'Take a screenshot of the current page.', inputSchema: { type: 'object', properties: { type: { type: 'string', enum: ['png', 'jpeg'], default: 'png', description: 'Image format for the screenshot.' }, filename: { type: 'string', description: 'File name to save the screenshot to.' }, fullPage: { type: 'boolean', description: 'When true, takes a screenshot of the full scrollable page.' }, ref: { type: 'string', description: 'Exact target element reference from the page snapshot.' }, element: { type: 'string', description: 'Human-readable element description.' } }, required: ['type'] } },
   { name: 'browser_type', description: 'Type text into editable element', inputSchema: { type: 'object', properties: { ref: { type: 'string', description: 'Exact target element reference from the page snapshot' }, text: { type: 'string', description: 'Text to type into the element' }, element: { type: 'string', description: 'Human-readable element description' }, submit: { type: 'boolean', description: 'Whether to submit entered text (press Enter after)' }, slowly: { type: 'boolean', description: 'Whether to type one character at a time.' } }, required: ['ref', 'text'] } },
   { name: 'browser_wait_for', description: 'Wait for text to appear or disappear or a specified time to pass', inputSchema: { type: 'object', properties: { text: { type: 'string', description: 'The text to wait for' }, textGone: { type: 'string', description: 'The text to wait for to disappear' }, time: { type: 'number', description: 'The time to wait in seconds' } } } },
+  { name: 'browser_launch', description: 'Ensure Chrome is running. Launches Chrome if it is not already running. Use this after getting ECONNREFUSED errors.', inputSchema: { type: 'object', properties: {} } },
 ]
 
 // ── State ─────────────────────────────────────────────────────────
@@ -234,6 +235,23 @@ rl.on('line', async (line) => {
 
   // tools/call — this is where we need Chrome + Playwright MCP
   if (msg.method === 'tools/call') {
+    // browser_launch — handled by proxy, not forwarded to child
+    if (msg.params && msg.params.name === 'browser_launch') {
+      const running = await checkPort(CDP_PORT)
+      if (running) {
+        send({ jsonrpc: '2.0', id: msg.id, result: { content: [{ type: 'text', text: 'Chrome is already running.' }] } })
+      } else {
+        // Kill stale child if any
+        if (child) { child.kill(); child = null; childReady = false }
+        const ok = await ensureChild()
+        if (ok) {
+          send({ jsonrpc: '2.0', id: msg.id, result: { content: [{ type: 'text', text: 'Chrome launched successfully.' }] } })
+        } else {
+          sendError(msg.id, -32000, 'Failed to launch Chrome')
+        }
+      }
+      return
+    }
     if (childReady && child) {
       child.stdin.write(line + '\n')
       return
