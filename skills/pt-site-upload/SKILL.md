@@ -41,6 +41,44 @@ This skill requires two MCP servers to be connected:
 3. Call `get_catalog({ id })` to get catalog details — note `contact_phone` if present.
 4. Ask the user: **"All items, or do you want to pick specific ones?"** — just two options. Do NOT list the items upfront. If they pick specific ones, then show the list and let them choose.
 
+## Step 1B — Check Upload Logs
+
+Before downloading images or navigating to any marketplace, check for existing upload logs to avoid re-publishing items.
+
+1. Read `upload-log-olx.json` and `upload-log-facebook.json` from the current working directory.
+   - If a file does not exist or is empty, treat it as an empty array `[]` — this is a fresh run for that platform.
+   - If a file contains malformed JSON, warn the user and treat it as empty.
+2. Cross-reference fetched items against each log. An item is **already uploaded** to a platform if there is a log entry matching `item_id` with `"status": "success"`.
+   - Entries with `"status": "failed"` do **not** block retries.
+3. Show the user a compact status per item:
+   ```
+   Upload logs found:
+     • Mesa de jardim — already on OLX (2026-03-28)
+     • iPhone 13 Pro — already on OLX + Facebook (2026-03-27)
+     • Sofá de 3 lugares — not yet uploaded
+
+   I'll skip already-uploaded items. Want me to re-upload any of them?
+   ```
+4. Let the user confirm or override before proceeding.
+
+### Log file format
+
+Each log file is an array of objects:
+```json
+[
+  {
+    "item_id": "abc123",
+    "item_title": "Mesa de jardim",
+    "catalog_id": "cat1",
+    "url": "https://olx.pt/listing/...",
+    "published_at": "2026-03-29T14:30:00Z",
+    "status": "success"
+  }
+]
+```
+
+---
+
 ## Step 2 — Download Images
 
 `browser_file_upload` requires local file paths. Download all images before navigating to any marketplace.
@@ -126,7 +164,20 @@ After filling fields, move on. Do not screenshot after every single field — be
 1. `browser_take_screenshot` to verify the form looks correct.
 2. Click the "Publicar anúncio" button. **Do NOT ask the user for confirmation on each item** — just publish and move on to the next. Only stop if something goes wrong.
 3. **Promotion upsell page** — OLX will show a "Destacar anúncio" page with paid promotion options. Click **"Não destacar"** to skip, then confirm with **"Sim, publicar"** in the dialog that appears.
-4. Note the ad ID from the URL for the summary, then immediately start the next item.
+4. Note the ad ID from the URL for the summary.
+5. **Write to upload log** — immediately append an entry to `upload-log-olx.json`:
+   ```json
+   {
+     "item_id": "{item.id}",
+     "item_title": "{item.title}",
+     "catalog_id": "{catalog_id}",
+     "url": "{listing_url or null}",
+     "published_at": "{ISO 8601 timestamp}",
+     "status": "success"
+   }
+   ```
+   If publishing failed, log with `"status": "failed"` and add a `"reason"` field. Write the file after each item — do not wait until the end.
+6. Start the next item.
 
 ---
 
@@ -167,6 +218,18 @@ No phone number needed for Facebook Marketplace.
 3. Facebook redirects to "Your listings" page.
 4. **"Boost your listing" dialog** may appear — click **"Close"** to skip.
 5. **Do NOT ask the user for confirmation on each item** — just publish and move on to the next item.
+6. **Write to upload log** — immediately append an entry to `upload-log-facebook.json`:
+   ```json
+   {
+     "item_id": "{item.id}",
+     "item_title": "{item.title}",
+     "catalog_id": "{catalog_id}",
+     "url": "{listing_url or null}",
+     "published_at": "{ISO 8601 timestamp}",
+     "status": "success"
+   }
+   ```
+   If publishing failed, log with `"status": "failed"` and add a `"reason"` field. Write the file after each item — do not wait until the end.
 
 ---
 
@@ -184,7 +247,10 @@ Totals:
   Items in catalog: N
   Published to OLX: X
   Published to Facebook: Y
+  Skipped (already uploaded): S
   Skipped/Failed: Z
+
+Upload logs saved to: upload-log-olx.json, upload-log-facebook.json
 ```
 
 ---
