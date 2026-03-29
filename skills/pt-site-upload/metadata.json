@@ -2,7 +2,7 @@
   "name": "pt-site-upload",
   "description": "Publish catalog items to Portuguese marketplaces",
   "country": "pt",
-  "platforms": ["OLX", "CustoJusto", "Facebook Marketplace"],
+  "platforms": ["OLX", "Facebook Marketplace"],
   "language": "en",
   "version": "1.0.0"
 }

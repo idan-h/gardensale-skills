@@ -1,10 +1,10 @@
 ---
-description: Publish GardenSale catalog items to Portuguese marketplaces (OLX, CustoJusto, Facebook Marketplace). Guides the user through listing creation with copy-paste field values.
+description: Publish GardenSale catalog items to Portuguese marketplaces (OLX, Facebook Marketplace). Guides the user through listing creation with copy-paste field values.
 ---
 
 # Publish to Portuguese Marketplaces
 
-Guide the user through publishing their GardenSale catalog items to OLX Portugal, CustoJusto, and Facebook Marketplace.
+Guide the user through publishing their GardenSale catalog items to OLX Portugal and Facebook Marketplace.
 
 ## Prerequisites
 
@@ -69,33 +69,6 @@ After the user confirms the listing is live, ask them to share the listing URL.
 
 ---
 
-### CustoJusto
-
-**URL:** https://www.custojusto.pt/ai/novo
-
-**Category:** Casa, Jardim e Bricolage → Jardim
-
-| Field | Value |
-|---|---|
-| Título | `{item.title}` (max 60 characters) |
-| Descrição | `{item.description}` |
-| Preço | `{item.price}` € |
-| Distrito | Ask the user for their district |
-| Contacto | Ask the user for their phone number |
-
-**Images:** Upload all item images (max 10 on CustoJusto).
-
-**Steps to guide the user:**
-1. Open https://www.custojusto.pt/ai/novo
-2. Select category: Casa, Jardim e Bricolage → Jardim
-3. Fill in the fields above
-4. Upload photos
-5. Review and publish
-
-After the user confirms, ask for the listing URL.
-
----
-
 ### Facebook Marketplace
 
 **URL:** https://www.facebook.com/marketplace/create/item
@@ -130,7 +103,6 @@ After processing all items, present a summary:
 
 - Total items in catalog: N
 - Published to OLX: X items
-- Published to CustoJusto: X items
 - Published to Facebook Marketplace: X items
 - Skipped: list any items the user chose not to publish and why
 

@@ -1,6 +1,6 @@
 # gardensale-skills
 
-AI agent skills for publishing [GardenSale](https://gardensale.app) catalog items to online marketplaces.
+AI agent skills for publishing [GardenSale](https://gardensale.eu) catalog items to online marketplaces.
 
 Works with Claude Code, Cursor, GitHub Copilot, Windsurf, OpenCode, Codex, Antigravity, and Gemini CLI.
 
@@ -31,7 +31,7 @@ npx @gardensale/skills list
 | Antigravity | `antigravity` | `.antigravity/skills/` |
 | Gemini CLI | `gemini-cli` | `.gemini/skills/` |
 
-For **Claude Desktop**, **Claude.ai**, and **ChatGPT** — download the skill ZIP from the [GardenSale Skills page](https://gardensale.app/skills) and upload it via Customize → Skills.
+For **Claude Desktop**, **Claude.ai**, and **ChatGPT** — download the skill ZIP from the [GardenSale Skills page](https://gardensale.eu/skills) and upload it via Customize → Skills.
 
 ## Available Skills
 
