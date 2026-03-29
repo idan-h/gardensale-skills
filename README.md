@@ -33,11 +33,28 @@ npx @gardensale/skills list
 
 For **Claude Desktop**, **Claude.ai**, and **ChatGPT** — download the skill ZIP from the [GardenSale Skills page](https://gardensale.eu/skills) and upload it via Customize → Skills.
 
+### MCP Auto-Configuration
+
+Some skills require MCP server dependencies (e.g., browser automation via `@playwright/mcp`).
+When you install such a skill, the CLI automatically configures the required MCP servers
+in your platform's settings file.
+
+Supported for auto-configuration:
+
+| Platform | Config file |
+|---|---|
+| Claude Code | `.claude/settings.local.json` |
+| Cursor | `.cursor/mcp.json` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+| GitHub Copilot | `.vscode/mcp.json` |
+
+For other platforms, see the skill's `mcp.json` for the required config.
+
 ## Available Skills
 
 | Skill | Country | Platforms | Description |
 |---|---|---|---|
-| `pt-site-upload` | Portugal | OLX, CustoJusto, Facebook Marketplace | Publish catalog items to Portuguese marketplaces |
+| `pt-site-upload` | Portugal | OLX, Facebook Marketplace | Publish catalog items via browser automation |
 
 ## Adding a New Skill
 

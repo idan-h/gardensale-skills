@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser", "chrome",
+        "--viewport-size", "1280x900",
+        "--init-script", "{RESOURCES_DIR}/stealth.js"
+      ]
+    }
+  }
+}
