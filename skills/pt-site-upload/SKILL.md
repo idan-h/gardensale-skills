@@ -70,6 +70,7 @@ Each log file is an array of objects:
   {
     "item_id": "abc123",
     "item_title": "Mesa de jardim",
+    "price": 50,
     "catalog_id": "cat1",
     "url": "https://olx.pt/listing/...",
     "published_at": "2026-03-29T14:30:00Z",
@@ -170,6 +171,7 @@ After filling fields, move on. Do not screenshot after every single field — be
    {
      "item_id": "{item.id}",
      "item_title": "{item.title}",
+     "price": {item.price},
      "catalog_id": "{catalog_id}",
      "url": "{listing_url or null}",
      "published_at": "{ISO 8601 timestamp}",
@@ -223,6 +225,7 @@ No phone number needed for Facebook Marketplace.
    {
      "item_id": "{item.id}",
      "item_title": "{item.title}",
+     "price": {item.price},
      "catalog_id": "{catalog_id}",
      "url": "{listing_url or null}",
      "published_at": "{ISO 8601 timestamp}",
