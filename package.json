@@ -1,6 +1,6 @@
 {
   "name": "@gardensale/skills",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "AI agent skills for publishing Gardensale catalog items to marketplaces",
   "bin": {
     "gardensale-skills": "./bin/cli.js",

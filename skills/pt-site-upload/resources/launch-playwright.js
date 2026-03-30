@@ -17,6 +17,7 @@ const os = require('os')
 const CDP_PORT = 9222
 const NPX = process.platform === 'win32' ? 'npx.cmd' : 'npx'
 const CHROME_DATA_DIR = path.join(os.tmpdir(), 'playwright-cdp-chrome')
+const STEALTH_SCRIPT = path.join(__dirname, 'stealth.js')
 
 // ── Chrome discovery ──────────────────────────────────────────────
 
@@ -155,6 +156,7 @@ function spawnChild() {
       '@playwright/mcp@latest',
       '--cdp-endpoint', `http://127.0.0.1:${CDP_PORT}`,
       '--allow-unrestricted-file-access',
+      '--init-script', STEALTH_SCRIPT,
     ], { stdio: ['pipe', 'pipe', 'inherit'], shell: true })
 
     const childRl = readline.createInterface({ input: proc.stdout, terminal: false })
