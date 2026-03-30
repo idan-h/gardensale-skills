@@ -31,6 +31,7 @@ This skill requires two MCP servers to be connected:
 - `browser_press_key` — press a keyboard key
 - `browser_close` — close the browser
 - `browser_launch` — ensure Chrome is running. Use this if you get ECONNREFUSED errors (Chrome was closed).
+- `download_file` — download a file from a URL to a local path (no browser needed)
 
 ---
 
@@ -84,12 +85,11 @@ Each log file is an array of objects:
 `browser_file_upload` requires local file paths. Download all images before navigating to any marketplace.
 
 1. For each item, call `download_item_images({ item_id, filenames })` to get the image URLs.
-2. Download each image to a local directory using `curl`:
-```bash
-mkdir -p gs-images/{item_id}
-curl -o "gs-images/{item_id}/{filename}" "{image_url}"
+2. Download each image using the `download_file` tool:
 ```
-3. Verify downloads succeeded (non-zero file sizes) before proceeding.
+download_file({ url: "{image_url}", dest_path: "gs-images/{item_id}/{filename}" })
+```
+3. Verify downloads succeeded (the tool reports file size) before proceeding.
 
 ## Step 3 — Gather User Info
 

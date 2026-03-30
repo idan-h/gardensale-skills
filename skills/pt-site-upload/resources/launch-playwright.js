@@ -9,6 +9,8 @@ const readline = require('readline')
 const path = require('path')
 const net = require('net')
 const fs = require('fs')
+const https = require('https')
+const http = require('http')
 
 const os = require('os')
 
@@ -91,7 +93,31 @@ const TOOLS = [
   { name: 'browser_type', description: 'Type text into editable element', inputSchema: { type: 'object', properties: { ref: { type: 'string', description: 'Exact target element reference from the page snapshot' }, text: { type: 'string', description: 'Text to type into the element' }, element: { type: 'string', description: 'Human-readable element description' }, submit: { type: 'boolean', description: 'Whether to submit entered text (press Enter after)' }, slowly: { type: 'boolean', description: 'Whether to type one character at a time.' } }, required: ['ref', 'text'] } },
   { name: 'browser_wait_for', description: 'Wait for text to appear or disappear or a specified time to pass', inputSchema: { type: 'object', properties: { text: { type: 'string', description: 'The text to wait for' }, textGone: { type: 'string', description: 'The text to wait for to disappear' }, time: { type: 'number', description: 'The time to wait in seconds' } } } },
   { name: 'browser_launch', description: 'Ensure Chrome is running. Launches Chrome if it is not already running. Use this after getting ECONNREFUSED errors.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'download_file', description: 'Download a file from a URL to a local path. Does not require a browser.', inputSchema: { type: 'object', properties: { url: { type: 'string', description: 'The URL to download' }, dest_path: { type: 'string', description: 'Full local file path to save to (e.g. C:/images/photo.jpg)' } }, required: ['url', 'dest_path'] } },
 ]
+
+// ── File download ────────────────────────────────────────────────
+
+function downloadFile(url, destPath, maxRedirects = 5) {
+  return new Promise((resolve, reject) => {
+    if (maxRedirects <= 0) return reject(new Error('Too many redirects'))
+    const client = url.startsWith('https') ? https : http
+    client.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return downloadFile(res.headers.location, destPath, maxRedirects - 1).then(resolve, reject)
+      }
+      if (res.statusCode !== 200) {
+        res.resume()
+        return reject(new Error(`HTTP ${res.statusCode}`))
+      }
+      fs.mkdirSync(path.dirname(destPath), { recursive: true })
+      const file = fs.createWriteStream(destPath)
+      res.pipe(file)
+      file.on('finish', () => { file.close(); resolve() })
+      file.on('error', (e) => { fs.unlink(destPath, () => {}); reject(e) })
+    }).on('error', reject)
+  })
+}
 
 // ── State ─────────────────────────────────────────────────────────
 
@@ -249,6 +275,22 @@ rl.on('line', async (line) => {
         } else {
           sendError(msg.id, -32000, 'Failed to launch Chrome')
         }
+      }
+      return
+    }
+    // download_file — handled by proxy, no browser needed
+    if (msg.params && msg.params.name === 'download_file') {
+      const { url, dest_path } = msg.params.arguments || {}
+      if (!url || !dest_path) {
+        sendError(msg.id, -32602, 'Missing required parameters: url and dest_path')
+        return
+      }
+      try {
+        await downloadFile(url, dest_path)
+        const size = fs.statSync(dest_path).size
+        send({ jsonrpc: '2.0', id: msg.id, result: { content: [{ type: 'text', text: `Downloaded to ${dest_path} (${size} bytes)` }] } })
+      } catch (e) {
+        sendError(msg.id, -32000, `Download failed: ${e.message}`)
       }
       return
     }
