@@ -239,7 +239,7 @@ if (command === 'list') {
   addSkill(skillName, agent, isDev, isGlobal)
 } else {
   console.log(`
-gardensale-skills — AI agent skills for GardenSale
+gardensale-skills — AI agent skills for Gardensale
 
 Commands:
   add <skill> -a <platform> [-g] [--dev]   Install a skill for a platform

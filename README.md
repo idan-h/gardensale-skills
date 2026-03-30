@@ -1,6 +1,6 @@
 # gardensale-skills
 
-AI agent skills for publishing [GardenSale](https://gardensale.eu) catalog items to online marketplaces.
+AI agent skills for publishing [Gardensale](https://gardensale.eu) catalog items to online marketplaces.
 
 Works with Claude Code, Cursor, GitHub Copilot, Windsurf, OpenCode, Codex, Antigravity, and Gemini CLI.
 
@@ -31,7 +31,7 @@ npx @gardensale/skills list
 | Antigravity | `antigravity` | `.antigravity/skills/` |
 | Gemini CLI | `gemini-cli` | `.gemini/skills/` |
 
-For **Claude Desktop**, **Claude.ai**, and **ChatGPT** — download the skill ZIP from the [GardenSale Skills page](https://gardensale.eu/skills) and upload it via Customize → Skills.
+For **Claude Desktop**, **Claude.ai**, and **ChatGPT** — download the skill ZIP from the [Gardensale Skills page](https://gardensale.eu/skills) and upload it via Customize → Skills.
 
 ### MCP Auto-Configuration
 
@@ -89,7 +89,7 @@ For other platforms, see the skill's `mcp.json` for the required config.
 
 5. **Push to `main`** — GitHub Actions will auto-publish to npm.
 
-## Updating the GardenSale /skills page
+## Updating the Gardensale /skills page
 
 After adding a skill to this package:
 

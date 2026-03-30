@@ -1,10 +1,10 @@
 # pt-site-upload
 
-Publish GardenSale catalog items to Portuguese marketplaces via browser automation.
+Publish Gardensale catalog items to Portuguese marketplaces via browser automation.
 
 ## How It Works
 
-1. Fetches your catalog items via the GardenSale MCP server
+1. Fetches your catalog items via the Gardensale MCP server
 2. Downloads item images locally
 3. Infers the best marketplace category from item title/description
 4. Controls a real browser (via `@playwright/mcp`) to fill forms, upload images, and post listings
@@ -33,7 +33,7 @@ Publish GardenSale catalog items to Portuguese marketplaces via browser automati
 
 - `@playwright/mcp` (auto-configured by the CLI installer)
 - Chrome browser installed
-- GardenSale MCP server connected (for catalog data)
+- Gardensale MCP server connected (for catalog data)
 
 ## Files
 

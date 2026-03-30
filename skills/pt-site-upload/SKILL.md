@@ -1,16 +1,16 @@
 ---
-description: Publish GardenSale catalog items to OLX Portugal and Facebook Marketplace using browser automation. Fetches items via GardenSale MCP, controls browser via Playwright MCP.
+description: Publish Gardensale catalog items to OLX Portugal and Facebook Marketplace using browser automation. Fetches items via Gardensale MCP, controls browser via Playwright MCP.
 ---
 
 # Publish to Portuguese Marketplaces
 
-Automate publishing GardenSale catalog items to OLX Portugal and Facebook Marketplace. You control a real browser — navigate pages, fill forms, upload images, and post listings. Behave like a real user.
+Automate publishing Gardensale catalog items to OLX Portugal and Facebook Marketplace. You control a real browser — navigate pages, fill forms, upload images, and post listings. Behave like a real user.
 
 ## Prerequisites
 
 This skill requires two MCP servers to be connected:
 
-**GardenSale MCP** — provides item data:
+**Gardensale MCP** — provides item data:
 - `list_catalogs()` — get user's catalogs
 - `list_items({ catalog_id })` — get items in a catalog
 - `get_item({ id })` — get a single item
